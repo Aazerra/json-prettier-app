@@ -27,11 +27,43 @@ function App(props) {
     return () => clipboard.destroy()
   }, [text])
 
+  const prettify = (rawText) => {
+        try {
+          const newText = format(rawText, {
+            parser: "json",
+            printWidth: 0,
+            trailingComma: "all",
+            plugins: [parserBabel],
+          });
+
+          instance.setValue(newText);
+        } catch (e) {
+          console.error(e);
+
+          Toastify({
+            text: "Invalid JSON",
+            duration: 3000,
+            newWindow: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor:
+              "linear-gradient(to right, rgb(255, 95, 109), rgb(255, 195, 113))",
+            stopOnFocus: true,
+          }).showToast();
+        }
+    }
+  const handlePaste = (editor, event) => {
+      event.preventDefault(); // prevent default paste
+      const pastedText = event.clipboardData.getData("text");
+      prettify(pastedText)
+  }
+
   return (
     <div className="wrapper">
       <CodeMirror
         editorDidMount={(editor) => {
           instance = editor;
+          instance.on("paste", handlePaste)
         }}
         onChange={(editor, data, value) => {
           setText(value);
@@ -69,31 +101,7 @@ function App(props) {
         <a
           href
           className="btn"
-          onClick={() => {
-            try {
-              const newText = format(text, {
-                parser: "json",
-                printWidth: 0,
-                trailingComma: "all",
-                plugins: [parserBabel],
-              });
-
-              instance.setValue(newText);
-            } catch (e) {
-              console.error(e);
-
-              Toastify({
-                text: "Invalid JSON",
-                duration: 3000,
-                newWindow: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor:
-                  "linear-gradient(to right, rgb(255, 95, 109), rgb(255, 195, 113))",
-                stopOnFocus: true,
-              }).showToast();
-            }
-          }}
+          onClick={() => prettify(text)}
         >
           <span>Prettify</span>
         </a>
