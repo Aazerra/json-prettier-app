@@ -53,7 +53,7 @@ function App(props) {
         }
     }
   const handlePaste = (editor, event) => {
-      event.preventDefault(); // prevent default paste
+      event.preventDefault();
       const pastedText = event.clipboardData.getData("text");
       prettify(pastedText)
   }
